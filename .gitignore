@@ -1,0 +1,24 @@
+.DS_Store
+/node_modules/
+*.log
+/.pnp
+.pnp.js
+yarn.debug.log*
+yarn.error.log*
+npm-debug.log*
+
+# React Router
+/.react-router/
+/build/
+/design/
+
+# IDEs and editors
+/.idea
+/.vscode
+*.swp
+*.swo
+
+# Production 
+/dist
+/.next
+/out
