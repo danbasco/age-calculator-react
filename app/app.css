@@ -1,15 +1,31 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+@font-face {
+  font-family: Poppins-Bold;
+  src: url("./assets/fonts/Poppins-Bold.ttf");
 }
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
+@font-face {
+  font-family: Poppins-BoldItalix;
+  src: url("./assets/fonts/Poppins-BoldItalic.ttf");
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+@font-face {
+  font-family: Poppins-ExtraBold;
+  src: url("./assets/fonts/Poppins-ExtraBold.ttf");
+}
+
+@font-face {
+  font-family: Poppins-ExtraBoldItalic;
+  src: url("./assets/fonts/Poppins-ExtraBoldItalic.ttf");
+}
+
+@font-face {
+  font-family: Poppins-Italic;
+  src: url("./assets/fonts/Poppins-Italic.ttf");
+}
+
+@font-face {
+  font-family: Poppins-Regular;
+  src: url("./assets/fonts/Poppins-Regular.ttf");
 }
