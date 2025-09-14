@@ -1,99 +1,93 @@
-import React from "react";
+import type { UseFormRegister, FieldErrors } from "react-hook-form";
 
-interface ErrorState {
-  day?: string;
-  month?: string;
-  year?: string;
-}
-
-export interface Props {
+type FormFields = {
   day: string;
   month: string;
   year: string;
-  setDay: React.Dispatch<React.SetStateAction<string>>;
-  setMonth: React.Dispatch<React.SetStateAction<string>>;
-  setYear: React.Dispatch<React.SetStateAction<string>>;
-  errors: ErrorState;
+};
+
+interface Props {
+  register: UseFormRegister<FormFields>;
+  errors: FieldErrors<FormFields>;
 }
 
-const DateInput: React.FC<Props> = ({
-  day,
-  setDay,
-  month,
-  setMonth,
-  year,
-  setYear,
-  errors,
-}) => {
-  const labelErrorClass = "text-red-500";
-  const inputErrorClass = "border-red-500";
+const DateInput: React.FC<Props> = ({ register, errors }) => {
+  const labelErr = "text-red-500";
+  const inputErr = "border-red-500";
+  const base =
+    "p-3 border rounded-lg w-full sm:w-28 text-2xl font-bold focus:outline-none focus:border-violet-600";
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col sm:flex-row gap-4">
+      {/* DAY */}
       <div className="flex flex-col">
         <label
           htmlFor="day"
           className={`text-xs font-bold tracking-widest mb-2 ${
-            errors.day ? labelErrorClass : "text-stone-500"
+            errors.day ? labelErr : "text-stone-500"
           }`}
         >
           DAY
         </label>
         <input
           id="day"
-          value={day}
           placeholder="DD"
-          onChange={(e) => setDay(e.target.value)}
-          className={`p-3 border rounded-lg w-full sm:w-28 text-2xl font-bold focus:outline-none focus:border-violet-600 ${
-            errors.day ? inputErrorClass : "border-stone-300"
-          }`}
+          inputMode="numeric"
+          {...register("day")}
+          className={`${base} ${errors.day ? inputErr : "border-stone-300"}`}
         />
         {errors.day && (
-          <p className="text-red-500 italic text-xs mt-1">{errors.day}</p>
+          <p className="text-red-500 italic text-xs mt-1">
+            {errors.day.message as string}
+          </p>
         )}
       </div>
+
+      {/* MONTH */}
       <div className="flex flex-col">
         <label
           htmlFor="month"
           className={`text-xs font-bold tracking-widest mb-2 ${
-            errors.month ? labelErrorClass : "text-stone-500"
+            errors.month ? labelErr : "text-stone-500"
           }`}
         >
           MONTH
         </label>
         <input
           id="month"
-          value={month}
           placeholder="MM"
-          onChange={(e) => setMonth(e.target.value)}
-          className={`p-3 border rounded-lg w-full sm:w-28 text-2xl font-bold focus:outline-none focus:border-violet-600 ${
-            errors.month ? inputErrorClass : "border-stone-300"
-          }`}
+          inputMode="numeric"
+          {...register("month")}
+          className={`${base} ${errors.month ? inputErr : "border-stone-300"}`}
         />
         {errors.month && (
-          <p className="text-red-500 italic text-xs mt-1">{errors.month}</p>
+          <p className="text-red-500 italic text-xs mt-1">
+            {errors.month.message as string}
+          </p>
         )}
       </div>
+
+      {/* YEAR */}
       <div className="flex flex-col">
         <label
           htmlFor="year"
           className={`text-xs font-bold tracking-widest mb-2 ${
-            errors.year ? labelErrorClass : "text-stone-500"
+            errors.year ? labelErr : "text-stone-500"
           }`}
         >
           YEAR
         </label>
         <input
           id="year"
-          value={year}
           placeholder="YYYY"
-          onChange={(e) => setYear(e.target.value)}
-          className={`p-3 border rounded-lg w-full sm:w-28 text-2xl font-bold focus:outline-none focus:border-violet-600 ${
-            errors.year ? inputErrorClass : "border-stone-300"
-          }`}
+          inputMode="numeric"
+          {...register("year")}
+          className={`${base} ${errors.year ? inputErr : "border-stone-300"}`}
         />
         {errors.year && (
-          <p className="text-red-500 italic text-xs mt-1">{errors.year}</p>
+          <p className="text-red-500 italic text-xs mt-1">
+            {errors.year.message as string}
+          </p>
         )}
       </div>
     </div>
