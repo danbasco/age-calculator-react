@@ -1,111 +1,105 @@
-import type { DateForm } from "~/lib/model";
-import type { Route } from "./+types/home";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import getAge from "~/lib/model";
 import DateInput from "~/components/DateInput";
 import SubmitButton from "~/components/SubmitButton";
 import DateText from "~/components/DateText";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Age Calculator App" },
-    { name: "description", content: "Calculate your age with React!" },
-  ];
-}
+const schema = z
+  .object({
+    day: z
+      .string()
+      .trim()
+      .nonempty("This field is required")
+      .regex(/^\d+$/, "Must be a valid day")
+      .refine((v) => {
+        const n = Number(v);
+        return n >= 1 && n <= 31;
+      }, "Must be a valid day"),
+    month: z
+      .string()
+      .trim()
+      .nonempty("This field is required")
+      .regex(/^\d+$/, "Must be a valid month")
+      .refine((v) => {
+        const n = Number(v);
+        return n >= 1 && n <= 12;
+      }, "Must be a valid month"),
+    year: z
+      .string()
+      .trim()
+      .nonempty("This field is required")
+      .regex(/^\d+$/, "Must be a valid year")
+      .refine((v) => {
+        const n = Number(v);
+        return n <= new Date().getFullYear();
+      }, "Must be in the past"),
+  })
+  .refine(
+    (data) => {
+      const day = Number(data.day);
+      const month = Number(data.month);
+      const year = Number(data.year);
+      if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year))
+        return false;
+      const date = new Date(year, month - 1, day);
+      return (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
+      );
+    },
+    { message: "Must be a valid date", path: ["day"] }
+  );
 
-interface ErrorState {
-  day?: string;
-  month?: string;
-  year?: string;
-}
+type FormFields = z.infer<typeof schema>;
 
 const Home: React.FC = () => {
-  const [day, setDay] = useState<string>("");
-  const [month, setMonth] = useState<string>("");
-  const [year, setYear] = useState<string>("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+    defaultValues: { day: "", month: "", year: "" },
+  });
 
-  const [daysOld, setDaysOld] = useState<string>("--");
-  const [monthsOld, setMonthsOld] = useState<string>("--");
-  const [yearsOld, setYearsOld] = useState<string>("--");
+  const [daysOld, setDaysOld] = useState("--");
+  const [monthsOld, setMonthsOld] = useState("--");
+  const [yearsOld, setYearsOld] = useState("--");
 
-  const [errors, setErrors] = useState<ErrorState>({});
+  const onSubmit = (data: FormFields) => {
+    const age = getAge({
+      day: Number(data.day),
+      month: Number(data.month),
+      year: Number(data.year),
+    });
+    setDaysOld(String(age.day));
+    setMonthsOld(String(age.month));
+    setYearsOld(String(age.year));
+  };
 
-  const onCalculate = () => {
-    const newErrors: ErrorState = {};
-    const today = new Date();
-
-    // --- Validation Logic ---
-
-    // 1. Check for empty fields first
-    if (!day) newErrors.day = "This field is required";
-    if (!month) newErrors.month = "This field is required";
-    if (!year) newErrors.year = "This field is required";
-
-    const inputDay = Number(day);
-    const inputMonth = Number(month);
-    const inputYear = Number(year);
-
-    // 2. Check for non-numeric strings (results in NaN)
-    if (day && isNaN(inputDay)) newErrors.day = "Must be a valid day";
-    if (month && isNaN(inputMonth)) newErrors.month = "Must be a valid month";
-    if (year && isNaN(inputYear)) newErrors.year = "Must be a valid year";
-
-    // 3. Proceed with range validation only if fields are not empty and are numbers
-    if (!newErrors.day && (inputDay < 1 || inputDay > 31)) {
-      newErrors.day = "Must be a valid day";
-    }
-    if (!newErrors.month && (inputMonth < 1 || inputMonth > 12)) {
-      newErrors.month = "Must be a valid month";
-    }
-    if (!newErrors.year && inputYear > today.getFullYear()) {
-      newErrors.year = "Must be in the past";
-    }
-
-    // 4. Final date validation (for invalid dates like Feb 30)
-    // This runs only if there are no prior errors
-    if (Object.keys(newErrors).length === 0) {
-      const date = new Date(inputYear, inputMonth - 1, inputDay);
-      if (date.getMonth() !== inputMonth - 1 || date.getDate() !== inputDay) {
-        newErrors.day = "Must be a valid date";
-        newErrors.month = " "; // Add error to trigger red style
-        newErrors.year = " "; // Add error to trigger red style
-      }
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      const inputDate: DateForm = {
-        day: inputDay,
-        month: inputMonth,
-        year: inputYear,
-      };
-      const age = getAge(inputDate);
-      setDaysOld(String(age.day));
-      setMonthsOld(String(age.month));
-      setYearsOld(String(age.year));
-    } else {
-      setDaysOld("--");
-      setMonthsOld("--");
-      setYearsOld("--");
-    }
+  const onError = () => {
+    setDaysOld("--");
+    setMonthsOld("--");
+    setYearsOld("--");
   };
 
   return (
     <main className="bg-stone-200 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white p-8 sm:p-12 rounded-3xl rounded-br-[100px] sm:rounded-br-[150px] max-w-2xl w-full">
-        <DateInput
-          day={day}
-          month={month}
-          year={year}
-          setDay={setDay}
-          setMonth={setMonth}
-          setYear={setYear}
-          errors={errors}
-        />
-        <SubmitButton onCalculate={onCalculate} />
+      <form
+        onSubmit={handleSubmit(onSubmit, onError)}
+        className="bg-white p-8 sm:p-12 rounded-3xl rounded-br-[100px] sm:rounded-br-[150px] max-w-2xl w-full"
+      >
+        <div className="flex flex-col">
+          <DateInput register={register} errors={errors} />
+          <SubmitButton />
+        </div>
         <DateText daysOld={daysOld} yearsOld={yearsOld} monthsOld={monthsOld} />
-      </div>
+      </form>
     </main>
   );
 };
